@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -87,17 +89,64 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    stack = util.Stack()
+    # print("Start:", problem.getStartState())
+    stack.push((problem.getStartState(), []))
+    visited = set()
+    while not stack.isEmpty():
+        state, path = stack.pop()
+        # print("Is the start a goal?", problem.isGoalState(state))
+        if problem.isGoalState(state):
+            return path
+        if state not in visited:
+            visited.add(state)
+            # print("Start's successors:", problem.getSuccessors(state))
+            for successor, action, stepCost in problem.getSuccessors(state):
+                if successor not in visited:
+                    new_path = path + [action]
+                    stack.push((successor, new_path))
     util.raiseNotDefined()
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    queue = util.Queue()
+    queue.push((problem.getStartState(), []))
+    visited = set()
+    while not queue.isEmpty():
+        state, path = queue.pop()
+        if problem.isGoalState(state):
+            return path
+        if state not in visited:
+            visited.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                if successor not in visited:
+                    new_path = path + [action]
+                    queue.push((successor, new_path))
     util.raiseNotDefined()
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    priority_queue = util.PriorityQueue()
+    priority_queue.push((problem.getStartState(), [], 0), 0)
+    visited = set()
+    while not priority_queue.isEmpty():
+        state, path, cost = priority_queue.pop()
+        if problem.isGoalState(state):
+            return path
+        if state not in visited:
+            visited.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                if successor not in visited:
+                    new_path = path + [action]
+                    new_cost = cost + stepCost
+                    priority_queue.push((successor, new_path, new_cost),
+                                        new_cost)
     util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +155,34 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    "1. neighbors"
+    "2. when we start + left"
+    "3. smallest cost"
+    "4. go there"
+    "5. destination"
+    pq = util.PriorityQueue()
+    start = problem.getStartState()
+    # push (state, path, cost) with priority = cost + heuristic
+    pq.push((start, [], 0), heuristic(start, problem))
+    expanded = set()
+
+    while not pq.isEmpty():
+        state, path, cost = pq.pop()
+        if problem.isGoalState(state):
+            return path
+        if state in expanded:
+            continue
+        expanded.add(state)
+        for succ, action, stepCost in problem.getSuccessors(state):
+            if succ not in expanded:
+                new_cost = cost + stepCost
+                priority = new_cost + heuristic(succ, problem)
+                pq.push((succ, path + [action], new_cost), priority)
+    return []
 
 
 # Abbreviations
