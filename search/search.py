@@ -185,6 +185,33 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     return []
 
 
+def bidirectionalSearch(problem):
+    from util import Queue
+
+    start = problem.getStartState()
+
+    forwardQueue = Queue()
+    forwardQueue.push((start, []))
+    forwardVisited = {}
+    forwardVisited[start] = []
+
+    goalCandidates = []
+
+    while not forwardQueue.isEmpty():
+        state, path = forwardQueue.pop()
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in forwardVisited:
+                newPath = path + [action]
+                forwardQueue.push((successor, newPath))
+                forwardVisited[successor] = newPath
+
+    return []
+
+
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
