@@ -185,36 +185,44 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     return []
 
 
-def bidirectionalSearch(problem):
-    from util import Queue
+def gravityCenterHeuristic(state, problem=None):
 
+    x, y = state
+    walls = problem.walls
+    cx = walls.width / 2.0
+    cy = walls.height / 2.0
+
+    dx = abs(x - cx)
+    dy = abs(y - cy)
+    return max(dx, dy)  #maximul, nu suma
+
+
+def greedyGravitySearch(problem, heuristic=nullHeuristic):
+    frontier = util.PriorityQueue()
     start = problem.getStartState()
+    frontier.push((start, []), heuristic(start, problem))
+    visited = set()
 
-    forwardQueue = Queue()
-    forwardQueue.push((start, []))
-    forwardVisited = {}
-    forwardVisited[start] = []
-
-    goalCandidates = []
-
-    while not forwardQueue.isEmpty():
-        state, path = forwardQueue.pop()
+    while not frontier.isEmpty():
+        state, path = frontier.pop()
 
         if problem.isGoalState(state):
             return path
 
-        for successor, action, stepCost in problem.getSuccessors(state):
-            if successor not in forwardVisited:
-                newPath = path + [action]
-                forwardQueue.push((successor, newPath))
-                forwardVisited[successor] = newPath
+        if state in visited:
+            continue
+        visited.add(state)
+
+        for succ, action, stepCost in problem.getSuccessors(state):
+            if succ not in visited:
+                new_path = path + [action]
+                frontier.push((succ, new_path), heuristic(succ, problem))
 
     return []
-
 
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
-bidirectional = bidirectionalSearch
+greedy = greedyGravitySearch
